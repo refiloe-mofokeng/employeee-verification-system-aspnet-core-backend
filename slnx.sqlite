@@ -1,0 +1,69 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\Visual Studio\\Employee_Verification System\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{926FDD9D-1337-4DB3-84EF-63C9F1ADC064}|Employee_Verification_System.csproj|c:\\visual studio\\employee_verification system\\views\\firestoreemployee\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{926FDD9D-1337-4DB3-84EF-63C9F1ADC064}|Employee_Verification_System.csproj|solutionrelative:views\\firestoreemployee\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{926FDD9D-1337-4DB3-84EF-63C9F1ADC064}|Employee_Verification_System.csproj|c:\\visual studio\\employee_verification system\\views\\home\\dashboard.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{926FDD9D-1337-4DB3-84EF-63C9F1ADC064}|Employee_Verification_System.csproj|solutionrelative:views\\home\\dashboard.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{926FDD9D-1337-4DB3-84EF-63C9F1ADC064}|Employee_Verification_System.csproj|c:\\visual studio\\employee_verification system\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{926FDD9D-1337-4DB3-84EF-63C9F1ADC064}|Employee_Verification_System.csproj|solutionrelative:program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 1,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "Dashboard.cshtml",
+              "DocumentMoniker": "C:\\Visual Studio\\Employee_Verification System\\Views\\Home\\Dashboard.cshtml",
+              "RelativeDocumentMoniker": "Views\\Home\\Dashboard.cshtml",
+              "ToolTip": "C:\\Visual Studio\\Employee_Verification System\\Views\\Home\\Dashboard.cshtml",
+              "RelativeToolTip": "Views\\Home\\Dashboard.cshtml",
+              "ViewState": "AgIAAIEAAAAAAAAAAAAswI4AAAA2AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-11-03T16:42:18.112Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "Index.cshtml",
+              "DocumentMoniker": "C:\\Visual Studio\\Employee_Verification System\\Views\\FirestoreEmployee\\Index.cshtml",
+              "RelativeDocumentMoniker": "Views\\FirestoreEmployee\\Index.cshtml",
+              "ToolTip": "C:\\Visual Studio\\Employee_Verification System\\Views\\FirestoreEmployee\\Index.cshtml",
+              "RelativeToolTip": "Views\\FirestoreEmployee\\Index.cshtml",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAgAAAA+AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-11-03T16:42:05.149Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "Program.cs",
+              "DocumentMoniker": "C:\\Visual Studio\\Employee_Verification System\\Program.cs",
+              "RelativeDocumentMoniker": "Program.cs",
+              "ToolTip": "C:\\Visual Studio\\Employee_Verification System\\Program.cs",
+              "RelativeToolTip": "Program.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAYAAAAyAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-30T17:02:24.718Z"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
