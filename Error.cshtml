@@ -1,0 +1,34 @@
+﻿@model List<Employee_Verification_System.Admin.Models.FirestoreEmployee>
+
+<h2>Employee Dashboard</h2>
+
+<p>Total Employees: @ViewBag.TotalEmployees</p>
+<p>Pending Verifications: @ViewBag.PendingVerifications</p>
+
+<table class="table table-bordered table-striped">
+    <thead class="table-dark">
+        <tr>
+            <th>Employee #</th>
+            <th>First Name</th>
+            <th>Last Name</th>
+            <th>Email</th>
+            <th>Department</th>
+            <th>Phone</th>
+            <th>Verified</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var emp in Model)
+        {
+            <tr>
+                <td>@emp.employeeNumber</td>
+                <td>@emp.firstName</td>
+                <td>@emp.lastName</td>
+                <td>@emp.email</td>
+                <td>@emp.department</td>
+                <td>@emp.phoneNumber</td>
+                <td>@(emp.isVerified ? "✅" : "❌")</td>
+            </tr>
+        }
+    </tbody>
+</table>

@@ -1,0 +1,295 @@
+﻿@{
+    ViewData["Title"] = "Dashboard";
+}
+
+<div class="row">
+    <div class="col-md-3">
+        <div class="card text-white bg-primary mb-3">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h4 id="totalEmployees">@ViewBag.TotalEmployees</h4>
+                        <p class="card-text">Total Employees</p>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-users fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-white bg-warning mb-3">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h4 id="pendingVerifications">@ViewBag.PendingVerifications</h4>
+                        <p class="card-text">Pending Verifications</p>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-clock fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-white bg-success mb-3">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h4 id="verifiedEmployees">@ViewBag.VerifiedEmployees</h4>
+                        <p class="card-text">Verified Employees</p>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-check-circle fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-white bg-danger mb-3">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h4 id="flaggedCases">@ViewBag.FlaggedCases</h4>
+                        <p class="card-text">Flagged Cases</p>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-flag fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5>Quick Actions</h5>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <a asp-controller="FirestoreEmployee" asp-action="Index" class="btn btn-warning btn-lg" id="pendingVerificationsBtn">
+                        <i class="fas fa-clock"></i> Review Pending Verifications (<span id="pendingVerificationsCount">@ViewBag.PendingVerifications</span>)
+                    </a>
+                    <a asp-controller="FirestoreEmployee" asp-action="Index" class="btn btn-primary btn-lg">
+                        <i class="fas fa-users"></i> Manage All Employees
+                    </a>
+                    <a asp-controller="Home" asp-action="Report" class="btn btn-success btn-lg">
+                        <i class="fas fa-file-alt"></i> Generate Report
+                    </a>
+                    <button onclick="refreshStats()" class="btn btn-info btn-lg">
+                        <i class="fas fa-sync-alt"></i> Refresh Statistics
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5>Real-time Activity</h5>
+                <small id="lastUpdated">Last updated: @DateTime.Now.ToString("HH:mm:ss")</small>
+            </div>
+            <div class="card-body">
+                <div class="list-group" id="activityFeed">
+                    <div class="list-group-item d-flex justify-content-between align-items-center">
+                        <div>
+                            <i class="fas fa-user-check text-success"></i>
+                            <span>Verified Employees</span>
+                        </div>
+                        <span class="badge bg-success rounded-pill" id="verifiedCount">@ViewBag.VerifiedEmployees</span>
+                    </div>
+                    <div class="list-group-item d-flex justify-content-between align-items-center">
+                        <div>
+                            <i class="fas fa-clock text-warning"></i>
+                            <span>Pending Verification</span>
+                        </div>
+                        <span class="badge bg-warning rounded-pill" id="pendingCount">@ViewBag.PendingVerifications</span>
+                    </div>
+                    <div class="list-group-item d-flex justify-content-between align-items-center">
+                        <div>
+                            <i class="fas fa-flag text-danger"></i>
+                            <span>Flagged Cases</span>
+                        </div>
+                        <span class="badge bg-danger rounded-pill" id="flaggedCount">@ViewBag.FlaggedCases</span>
+                    </div>
+                    <div class="list-group-item d-flex justify-content-between align-items-center">
+                        <div>
+                            <i class="fas fa-users text-primary"></i>
+                            <span>Total Employees</span>
+                        </div>
+                        <span class="badge bg-primary rounded-pill" id="totalCount">@ViewBag.TotalEmployees</span>
+                    </div>
+                </div>
+                <div class="mt-3">
+                    <h6>Recent Activity</h6>
+                    <div id="recentActivity" class="small">
+                        <!-- Recent activity will be populated here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Track flagged cases locally
+        let flaggedCasesCount = @ViewBag.FlaggedCases;
+        const activityLog = [];
+
+        // Real-time updates
+        function refreshStats() {
+            const refreshBtn = event?.target || document.querySelector('button[onclick="refreshStats()"]');
+            const originalText = refreshBtn.innerHTML;
+            refreshBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Refreshing...';
+            refreshBtn.disabled = true;
+
+            fetch('@Url.Action("GetDashboardStats", "Dashboard")')
+                .then(response => response.json())
+                .then(data => {
+                    if (!data.error) {
+                        // Update all counters
+                        updateDashboardCounters(data);
+
+                        refreshBtn.innerHTML = originalText;
+                        refreshBtn.disabled = false;
+
+                        // Show success message
+                        showAlert('Statistics updated successfully!', 'success');
+                    } else {
+                        refreshBtn.innerHTML = originalText;
+                        refreshBtn.disabled = false;
+                        showAlert('Error updating statistics: ' + data.error, 'danger');
+                    }
+                })
+                .catch(error => {
+                    refreshBtn.innerHTML = originalText;
+                    refreshBtn.disabled = false;
+                    showAlert('Error refreshing statistics: ' + error, 'danger');
+                });
+        }
+
+        function updateDashboardCounters(data) {
+            // Update main cards
+            document.getElementById('totalEmployees').textContent = data.totalEmployees;
+            document.getElementById('pendingVerifications').textContent = data.pendingVerifications;
+            document.getElementById('verifiedEmployees').textContent = data.verifiedEmployees;
+            document.getElementById('flaggedCases').textContent = flaggedCasesCount; // Use local count
+
+            // Update quick action button
+            document.getElementById('pendingVerificationsCount').textContent = data.pendingVerifications;
+
+            // Update activity feed
+            document.getElementById('verifiedCount').textContent = data.verifiedEmployees;
+            document.getElementById('pendingCount').textContent = data.pendingVerifications;
+            document.getElementById('flaggedCount').textContent = flaggedCasesCount; // Use local count
+            document.getElementById('totalCount').textContent = data.totalEmployees;
+
+            document.getElementById('lastUpdated').textContent = 'Last updated: ' + data.lastUpdated;
+        }
+
+        function updateFlaggedCases(increment = true) {
+            if (increment) {
+                flaggedCasesCount++;
+            } else {
+                flaggedCasesCount = Math.max(0, flaggedCasesCount - 1);
+            }
+
+            // Update UI
+            document.getElementById('flaggedCases').textContent = flaggedCasesCount;
+            document.getElementById('flaggedCount').textContent = flaggedCasesCount;
+
+            // Log activity
+            addActivity(`Employee ${increment ? 'flagged' : 'unflagged'}`);
+        }
+
+        function addActivity(message) {
+            const timestamp = new Date().toLocaleTimeString();
+            activityLog.unshift(`[${timestamp}] ${message}`);
+
+            // Keep only last 5 activities
+            if (activityLog.length > 5) {
+                activityLog.pop();
+            }
+
+            // Update activity display
+            updateActivityDisplay();
+        }
+
+        function updateActivityDisplay() {
+            const activityContainer = document.getElementById('recentActivity');
+            if (activityContainer) {
+                if (activityLog.length === 0) {
+                    activityContainer.innerHTML = '<div class="text-muted">No recent activity</div>';
+                } else {
+                    activityContainer.innerHTML = activityLog.map(activity =>
+                        `<div class="activity-item">${activity}</div>`
+                    ).join('');
+                }
+            }
+        }
+
+        function showAlert(message, type) {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type} alert-dismissible fade show mt-3`;
+            alertDiv.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            document.querySelector('.container main').prepend(alertDiv);
+
+            // Auto remove after 5 seconds
+            setTimeout(() => {
+                if (alertDiv.parentElement) {
+                    alertDiv.remove();
+                }
+            }, 5000);
+        }
+
+        // Listen for custom events from other pages
+        document.addEventListener('employeeVerified', function(e) {
+            refreshStats();
+            addActivity('Employee verified');
+            showAlert('Employee verification updated!', 'success');
+        });
+
+        document.addEventListener('employeeDeleted', function(e) {
+            refreshStats();
+            addActivity('Employee deleted');
+            showAlert('Employee deleted from system!', 'warning');
+        });
+
+        document.addEventListener('employeeFlagged', function(e) {
+            updateFlaggedCases(true);
+            addActivity('Employee flagged for review');
+            showAlert('Employee flagged for review!', 'warning');
+        });
+
+        document.addEventListener('employeeUnflagged', function(e) {
+            updateFlaggedCases(false);
+            addActivity('Employee unflagged');
+            showAlert('Employee unflagged!', 'info');
+        });
+
+        // Real-time updates every 10 seconds
+        setInterval(() => {
+            fetch('@Url.Action("GetDashboardStats", "Dashboard")')
+                .then(response => response.json())
+                .then(data => {
+                    if (!data.error) {
+                        updateDashboardCounters(data);
+                    }
+                })
+                .catch(error => console.error('Auto-refresh error:', error));
+        }, 10000);
+
+        // Initialize activity display
+        updateActivityDisplay();
+    </script>
+}

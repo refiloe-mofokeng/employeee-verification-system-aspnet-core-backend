@@ -1,0 +1,360 @@
+﻿@model Employee_Verification_System.Admin.Models.FirestoreEmployee
+@{
+    ViewData["Title"] = "Employee Details";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="fas fa-user"></i> Employee Details</h2>
+    <a asp-controller="FirestoreEmployee" asp-action="Index" class="btn btn-secondary">
+        <i class="fas fa-arrow-left"></i> Back to List
+    </a>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Personal Information</h5>
+            </div>
+            <div class="card-body">
+                <dl class="row">
+                    <dt class="col-sm-4">Employee Number:</dt>
+                    <dd class="col-sm-8">@Model.employeeNumber</dd>
+
+                    <dt class="col-sm-4">Full Name:</dt>
+                    <dd class="col-sm-8">@Model.firstName @Model.lastName</dd>
+
+                    <dt class="col-sm-4">Email:</dt>
+                    <dd class="col-sm-8">@Model.email</dd>
+
+                    <dt class="col-sm-4">Phone Number:</dt>
+                    <dd class="col-sm-8">@(string.IsNullOrEmpty(Model.phoneNumber) ? "N/A" : Model.phoneNumber)</dd>
+
+                    <dt class="col-sm-4">ID/Passport:</dt>
+                    <dd class="col-sm-8">@(string.IsNullOrEmpty(Model.idOrPassportNo) ? "N/A" : Model.idOrPassportNo)</dd>
+                </dl>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Employment Information</h5>
+            </div>
+            <div class="card-body">
+                <dl class="row">
+                    <dt class="col-sm-4">Department:</dt>
+                    <dd class="col-sm-8">@Model.department</dd>
+
+                    <dt class="col-sm-4">Location:</dt>
+                    <dd class="col-sm-8">@Model.location</dd>
+
+                    <dt class="col-sm-4">Site:</dt>
+                    <dd class="col-sm-8">@Model.site</dd>
+
+                    <dt class="col-sm-4">Verification Status:</dt>
+                    <dd class="col-sm-8">
+                        @if (Model.isVerified)
+                        {
+                            <span class="badge bg-success">
+                                <i class="fas fa-check-circle"></i> Verified
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-warning">
+                                <i class="fas fa-clock"></i> Pending Verification
+                            </span>
+                        }
+                    </dd>
+                </dl>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="card-title mb-0">Actions</h5>
+                <div>
+                    @if (!Model.isVerified)
+                    {
+                        <button type="button" class="btn btn-success verify-btn" data-email="@Model.email">
+                            <i class="fas fa-check"></i> Verify Employee
+                        </button>
+                    }
+                    else
+                    {
+                        <button type="button" class="btn btn-outline-secondary" disabled>
+                            <i class="fas fa-check-double"></i> Already Verified
+                        </button>
+                    }
+
+                    <button type="button" class="btn btn-danger delete-btn" data-email="@Model.email" data-name="@Model.firstName @Model.lastName">
+                        <i class="fas fa-trash-alt"></i> Delete Employee
+                    </button>
+
+                    <button type="button" class="btn btn-warning flag-btn" data-email="@Model.email">
+                        <i class="fas fa-flag"></i> Flag for Review
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Verification History Section -->
+<div class="row mt-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Verification History</h5>
+            </div>
+            <div class="card-body">
+                @if (ViewBag.VerificationHistory != null && ((IEnumerable<dynamic>)ViewBag.VerificationHistory).Any())
+                {
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Type</th>
+                                    <th>Status</th>
+                                    <th>Admin</th>
+                                    <th>Notes</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var verification in ViewBag.VerificationHistory)
+                                {
+                                    <tr>
+                                        <td>@verification.VerificationDate.ToString("MMM dd, yyyy HH:mm")</td>
+                                        <td>@verification.VerificationType</td>
+                                        <td>
+                                            <span class="badge @GetStatusBadgeClass(verification.Status)">
+                                                @verification.Status
+                                            </span>
+                                        </td>
+                                        <td>@(verification.Admin?.FirstName + " " + verification.Admin?.LastName)</td>
+                                        <td>@(verification.Notes ?? "N/A")</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+                else
+                {
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i> No verification history found for this employee.
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Verify button
+            document.querySelector('.verify-btn')?.addEventListener('click', function() {
+                const email = this.getAttribute('data-email');
+                verifyEmployee(email, this);
+            });
+
+            // Delete button
+            document.querySelector('.delete-btn')?.addEventListener('click', function() {
+                const email = this.getAttribute('data-email');
+                const name = this.getAttribute('data-name');
+                deleteEmployee(email, name, this);
+            });
+
+            // Flag button
+            document.querySelector('.flag-btn')?.addEventListener('click', function() {
+                const email = this.getAttribute('data-email');
+                flagEmployee(email, this);
+            });
+        });
+
+        function verifyEmployee(email, button) {
+            if (confirm('Are you sure you want to verify this employee?')) {
+                const originalText = button.innerHTML;
+                button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Verifying...';
+                button.disabled = true;
+
+                fetch('/FirestoreEmployee/Verify', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: 'id=' + encodeURIComponent(email)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Update UI
+                        updateVerificationStatus(true);
+                        button.innerHTML = '<i class="fas fa-check-double"></i> Verified';
+                        button.className = 'btn btn-outline-secondary';
+                        button.disabled = true;
+
+                        showAlert('Employee verified successfully!', 'success');
+
+                        // Notify other pages
+                        if (window.opener) {
+                            window.opener.postMessage({ type: 'employeeVerified', email: email }, '*');
+                        }
+                    } else {
+                        button.innerHTML = originalText;
+                        button.disabled = false;
+                        showAlert('Error: ' + data.message, 'danger');
+                    }
+                })
+                .catch(error => {
+                    button.innerHTML = originalText;
+                    button.disabled = false;
+                    showAlert('Error verifying employee: ' + error, 'danger');
+                });
+            }
+        }
+
+        function deleteEmployee(email, name, button) {
+            if (confirm(`Are you sure you want to delete ${name}? This action cannot be undone and will remove the employee from the system.`)) {
+                const originalText = button.innerHTML;
+                button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Deleting...';
+                button.disabled = true;
+
+                fetch('/FirestoreEmployee/Delete', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: 'id=' + encodeURIComponent(email)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showAlert('Employee deleted successfully!', 'warning');
+
+                        // Redirect back to list after delay
+                        setTimeout(() => {
+                            window.location.href = '/FirestoreEmployee';
+                        }, 2000);
+
+                        // Notify other pages
+                        if (window.opener) {
+                            window.opener.postMessage({ type: 'employeeDeleted', email: email }, '*');
+                        }
+                    } else {
+                        button.innerHTML = originalText;
+                        button.disabled = false;
+                        showAlert('Error: ' + data.message, 'danger');
+                    }
+                })
+                .catch(error => {
+                    button.innerHTML = originalText;
+                    button.disabled = false;
+                    showAlert('Error deleting employee: ' + error, 'danger');
+                });
+            }
+        }
+
+        function flagEmployee(email, button) {
+            if (confirm('Flag this employee for review?')) {
+                const originalText = button.innerHTML;
+                button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Flagging...';
+                button.disabled = true;
+
+                // Call API to flag employee
+                fetch('/Dashboard/UpdateFlaggedCases', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ increment: true })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        button.innerHTML = '<i class="fas fa-flag text-danger"></i> Flagged';
+                        button.className = 'btn btn-danger flag-btn';
+                        button.disabled = true;
+
+                        showAlert('Employee flagged for review!', 'warning');
+
+                        // Notify other pages
+                        if (window.opener) {
+                            window.opener.postMessage({ type: 'employeeFlagged', email: email }, '*');
+                        }
+                    } else {
+                        button.innerHTML = originalText;
+                        button.disabled = false;
+                        showAlert('Error flagging employee', 'danger');
+                    }
+                })
+                .catch(error => {
+                    button.innerHTML = originalText;
+                    button.disabled = false;
+                    showAlert('Error flagging employee: ' + error, 'danger');
+                });
+            }
+        }
+
+        function updateVerificationStatus(isVerified) {
+            const statusElement = document.querySelector('.badge');
+            if (statusElement) {
+                if (isVerified) {
+                    statusElement.className = 'badge bg-success';
+                    statusElement.innerHTML = '<i class="fas fa-check-circle"></i> Verified';
+                }
+            }
+        }
+
+        function showAlert(message, type) {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type} alert-dismissible fade show mt-3`;
+            alertDiv.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            document.querySelector('.container main').prepend(alertDiv);
+
+            setTimeout(() => {
+                if (alertDiv.parentElement) {
+                    alertDiv.remove();
+                }
+            }, 5000);
+        }
+
+        // Listen for messages from other windows (for real-time updates)
+        window.addEventListener('message', function(event) {
+            if (event.data.type === 'employeeVerified' && event.data.email === '@Model.email') {
+                updateVerificationStatus(true);
+
+                const verifyBtn = document.querySelector('.verify-btn');
+                if (verifyBtn) {
+                    verifyBtn.innerHTML = '<i class="fas fa-check-double"></i> Verified';
+                    verifyBtn.className = 'btn btn-outline-secondary';
+                    verifyBtn.disabled = true;
+                }
+            }
+        });
+    </script>
+}
+
+@functions {
+    public string GetStatusBadgeClass(string status)
+    {
+        return status?.ToLower() switch
+        {
+            "approved" or "completed" => "bg-success",
+            "rejected" or "cancelled" => "bg-danger",
+            "pending" => "bg-warning",
+            _ => "bg-secondary"
+        };
+    }
+}

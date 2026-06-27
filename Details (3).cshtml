@@ -1,0 +1,146 @@
+﻿@{
+    ViewData["Title"] = "Reports";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="fas fa-chart-bar"></i> System Reports</h2>
+    <a asp-controller="Home" asp-action="Dashboard" class="btn btn-secondary">
+        <i class="fas fa-arrow-left"></i> Back to Dashboard
+    </a>
+</div>
+
+<div class="row">
+    <div class="col-md-4">
+        <div class="card text-white bg-primary mb-3">
+            <div class="card-body text-center">
+                <i class="fas fa-users fa-3x mb-3"></i>
+                <h4>Employee Report</h4>
+                <p class="card-text">Complete list of all employees with verification status</p>
+                <button class="btn btn-light" onclick="generateReport('employees')">
+                    <i class="fas fa-download"></i> Generate
+                </button>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card text-white bg-success mb-3">
+            <div class="card-body text-center">
+                <i class="fas fa-check-circle fa-3x mb-3"></i>
+                <h4>Verified Employees</h4>
+                <p class="card-text">List of all verified employees</p>
+                <button class="btn btn-light" onclick="generateReport('verified')">
+                    <i class="fas fa-download"></i> Generate
+                </button>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card text-white bg-warning mb-3">
+            <div class="card-body text-center">
+                <i class="fas fa-clock fa-3x mb-3"></i>
+                <h4>Pending Verifications</h4>
+                <p class="card-text">Employees awaiting verification</p>
+                <button class="btn btn-light" onclick="generateReport('pending')">
+                    <i class="fas fa-download"></i> Generate
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-6">
+        <div class="card text-white bg-danger mb-3">
+            <div class="card-body text-center">
+                <i class="fas fa-flag fa-3x mb-3"></i>
+                <h4>Flagged Cases Report</h4>
+                <p class="card-text">Employees who have been flagged or deleted</p>
+                <button class="btn btn-light" onclick="generateReport('flagged')">
+                    <i class="fas fa-download"></i> Generate
+                </button>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card text-white bg-info mb-3">
+            <div class="card-body text-center">
+                <i class="fas fa-file-alt fa-3x mb-3"></i>
+                <h4>System Audit</h4>
+                <p class="card-text">Complete system activity and audit trail</p>
+                <button class="btn btn-light" onclick="generateReport('audit')">
+                    <i class="fas fa-download"></i> Generate
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card mt-4">
+    <div class="card-header">
+        <h5><i class="fas fa-history"></i> Recent Reports</h5>
+    </div>
+    <div class="card-body">
+        <div class="alert alert-info">
+            <i class="fas fa-info-circle"></i> Report generation history will appear here.
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function generateReport(type) {
+            let reportName = '';
+            switch(type) {
+                case 'employees':
+                    reportName = 'Employee Master List';
+                    break;
+                case 'verified':
+                    reportName = 'Verified Employees';
+                    break;
+                case 'pending':
+                    reportName = 'Pending Verifications';
+                    break;
+                case 'flagged':
+                    reportName = 'Flagged Cases';
+                    break;
+                case 'audit':
+                    reportName = 'System Audit';
+                    break;
+            }
+
+            // Show loading state
+            const button = event.target;
+            const originalText = button.innerHTML;
+            button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating...';
+            button.disabled = true;
+
+            // Simulate report generation
+            setTimeout(() => {
+                button.innerHTML = originalText;
+                button.disabled = false;
+                alert(`"${reportName}" report generated successfully!`);
+
+                // In a real application, this would download a file
+                // window.location.href = `/Report/Generate?type=${type}`;
+            }, 2000);
+        }
+
+        // Real-time updates for report data
+        function updateReportCounts() {
+            fetch('/Dashboard/GetDashboardStats')
+                .then(response => response.json())
+                .then(data => {
+                    if (!data.error) {
+                        // Update any real-time data on the report page
+                        console.log('Report data updated:', data);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error updating report data:', error);
+                });
+        }
+
+        // Update every 30 seconds
+        setInterval(updateReportCounts, 30000);
+    </script>
+}
